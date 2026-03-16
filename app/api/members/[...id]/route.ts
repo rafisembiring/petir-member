@@ -5,10 +5,11 @@ function getSql() {
   return neon(process.env.DATABASE_URL!)
 }
 
-export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string[] }> }) {
   try {
     const sql = getSql()
     const { id } = await params
+    const memberId = Array.isArray(id) ? id.join('/') : id
     const body = await req.json()
     const { name, jabatan, tempat_lahir, tgl_lahir, jenis_kelamin, agama, address, photo_url, status } = body
 
@@ -23,7 +24,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           address      = ${address || null},
           photo_url    = ${photo_url || null},
           status       = ${status || 'aktif'}
-      WHERE id = ${id}
+      WHERE id = ${memberId}
       RETURNING *
     `
     return NextResponse.json(rows[0])
@@ -32,11 +33,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string[] }> }) {
   try {
     const sql = getSql()
     const { id } = await params
-    await sql`DELETE FROM members WHERE id = ${id}`
+    const memberId = Array.isArray(id) ? id.join('/') : id
+    await sql`DELETE FROM members WHERE id = ${memberId}`
     return NextResponse.json({ ok: true })
   } catch (e: unknown) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 })

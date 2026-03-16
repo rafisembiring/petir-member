@@ -60,7 +60,8 @@ async function loadImage(src: string): Promise<HTMLImageElement> {
 // ── Component ────────────────────────────────────────────────
 
 export default function MemberCardPage() {
-  const { id } = useParams<{ id: string }>()
+  const params = useParams<{ id: string | string[] }>()
+  const id = Array.isArray(params.id) ? params.id.join('/') : (params.id ?? '')
   const [member, setMember] = useState<Member | null>(null)
   const [loading, setLoading] = useState(true)
   const [cardUrl, setCardUrl] = useState('')
